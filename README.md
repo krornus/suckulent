@@ -5,6 +5,11 @@
     - Versioning
     - Notes
     - Filtering
+        - length / time to make (0hr 50min)
+        - difficulty (easy/medium/hard)
+        - country / region (ex. Mexican Food)
+        - meal (bfast/brunch/dinner/snack/dessert)
+        - special ingredients / store (ex. Asian Market)
     - Branching/copying
     - File serializing/deserializing
 - Unit conversion system
