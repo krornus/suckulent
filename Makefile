@@ -6,12 +6,13 @@ SRC := ./src
 INC := ./inc
 OBJ := ./obj
 
-OBJECTS := $(OBJ)/suckulent.o
+OBJECTS := $(OBJ)/suckulent.o\
+           $(OBJ)/util.o
 
 DEPS := $(OBJECTS:.o=.d)
 
 CFLAGS  := -I$(INC)
-LDFLAGS :=
+LDFLAGS := -lreadline
 
 .PHONY: all debug release
 all: debug
