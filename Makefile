@@ -11,7 +11,7 @@ OBJECTS := $(OBJ)/suckulent.o\
 
 DEPS := $(OBJECTS:.o=.d)
 
-CFLAGS  := -I$(INC)
+CFLAGS  := -I$(INC) -Wall
 LDFLAGS := -lreadline
 
 .PHONY: all debug release
@@ -47,5 +47,5 @@ $(OBJ)/%.d: $(SRC)/%.c
 
 .PHONY: clean
 clean:
-	$(RM) -r $(OBJ) $(TARGET) $(TARGET)-test
+	$(RM) -r $(OBJ) $(TARGET)
 

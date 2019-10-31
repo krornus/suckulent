@@ -30,4 +30,6 @@ void *xrealloc(void *ptr, size_t size)
     if (tmp == NULL) {
         err(1, "FATAL: allocation failed");
     }
+
+    return tmp;
 }

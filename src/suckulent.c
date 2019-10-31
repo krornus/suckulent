@@ -10,6 +10,8 @@ static int cmd(int argc, char **argv)
     for (int i = 0; i < argc; i++) {
         printf("[%d]: '%s'\n", i, argv[i]);
     }
+
+    return 0;
 }
 
 static int readargv(char *prompt, wordexp_t *p)
