@@ -42,7 +42,7 @@ $(OBJ)/%.d: $(SRC)/%.c
 	$(CC) -MM -MF $@ $(CFLAGS) $<;\
 	sed -i 's,\($*\)\.o[\s:]*,\1.o $@: ,g' $@;
 
-%/:
+%:
 	mkdir -p $@
 
 .PHONY: clean
