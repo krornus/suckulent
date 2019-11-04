@@ -7,19 +7,23 @@ INC := ./inc
 OBJ := ./obj
 
 OBJECTS := $(OBJ)/suckulent.o\
+           $(OBJ)/arfs.o\
            $(OBJ)/util.o
 
 DEPS := $(OBJECTS:.o=.d)
 
-CFLAGS  := -I$(INC) -Wall
-LDFLAGS := -lreadline
+CFLAGS  := -I$(INC)
+CFLAGS  += -Wall -pedantic
+CFLAGS  += -D_X_OPEN_SOURCE=500 -D_GNU_SOURCE
+LDFLAGS := -lreadline -larchive
 
 .PHONY: all debug release
 all: debug
 
-debug: CFLAGS += -g
+debug: CFLAGS += -g -O0
 debug: $(TARGET)
 
+release: CFLAGS += -O2
 release: $(TARGET)
 
 ifneq ($(filter clean,$(MAKECMDGOALS)),clean)

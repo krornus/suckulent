@@ -43,6 +43,5 @@ static void cmdloop(char *prompt)
 
 int main(int argc, char *argv[])
 {
-    cmdloop("[sk] -> ");
     return 0;
 }

@@ -1,5 +1,9 @@
 # suckulent
 
+# Requirements
+- libreadline
+- libarchive
+
 # TODO
 - Database
     - Versioning
