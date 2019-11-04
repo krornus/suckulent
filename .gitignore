@@ -1,2 +1,4 @@
 obj/
 suckulent
+.gdb_history
+.kakrc
