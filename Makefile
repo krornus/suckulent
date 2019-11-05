@@ -16,7 +16,18 @@ CFLAGS  := -I$(INC)
 CFLAGS  += -Wall -pedantic
 CFLAGS  += -D_X_OPEN_SOURCE=500 -D_GNU_SOURCE
 CFLAGS  += -I/usr/local/opt/libarchive/include
-LDFLAGS := -lreadline -L/usr/local/Cellar/libarchive/3.4.0/lib -larchive
+# LDFLAGS := -lreadline -L/usr/local/Cellar/libarchive/3.4.0/lib -larchive
+LDFLAGS := -lreadline
+
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Darwin)
+LDFLAGS += -L/usr/local/Cellar/libarchive/3.4.0/lib -larchive
+endif
+
+ifeq ($(UNAME), Linux)
+LDFLAGS += -larchive
+endif
 
 .PHONY: all debug release
 all: debug
@@ -53,4 +64,3 @@ $(OBJ)/%.d: $(SRC)/%.c
 .PHONY: clean
 clean:
 	$(RM) -r $(OBJ) $(TARGET)
-

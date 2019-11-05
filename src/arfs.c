@@ -40,11 +40,9 @@ static void erra(struct archive *a, int eval, const char *fmt, ...)
     errsv = errno;
     arrsv = archive_errno(a);
 
-#ifdef __GLIBC__
-    if (program_invocation_short_name) {
-        fprintf(stderr, "%s: ", program_invocation_short_name);
+    if (GET_PROGRAM_NAME()) {
+        fprintf(stderr, "%s: ", GET_PROGRAM_NAME());
     }
-#endif
 
     va_start(ap, fmt);
     fprintf(stderr, fmt, ap);
