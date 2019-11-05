@@ -15,7 +15,8 @@ DEPS := $(OBJECTS:.o=.d)
 CFLAGS  := -I$(INC)
 CFLAGS  += -Wall -pedantic
 CFLAGS  += -D_X_OPEN_SOURCE=500 -D_GNU_SOURCE
-LDFLAGS := -lreadline -larchive
+CFLAGS  += -I/usr/local/opt/libarchive/include
+LDFLAGS := -lreadline -L/usr/local/Cellar/libarchive/3.4.0/lib -larchive
 
 .PHONY: all debug release
 all: debug

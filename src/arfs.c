@@ -11,6 +11,14 @@
 #include <assert.h>
 #include <archive.h>
 
+#undef GET_PROGRAM_NAME
+#ifdef __GLIBC__
+#   define GET_PROGRAM_NAME() program_invocation_short_name
+#else /* *BSD and OS X */
+#   include <stdlib.h>
+#   define GET_PROGRAM_NAME() getprogname()
+#endif
+
 struct arfs {
     char *path;
     struct archive *aw;
@@ -32,9 +40,11 @@ static void erra(struct archive *a, int eval, const char *fmt, ...)
     errsv = errno;
     arrsv = archive_errno(a);
 
+#ifdef __GLIBC__
     if (program_invocation_short_name) {
         fprintf(stderr, "%s: ", program_invocation_short_name);
     }
+#endif
 
     va_start(ap, fmt);
     fprintf(stderr, fmt, ap);
