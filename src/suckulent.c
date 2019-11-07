@@ -8,16 +8,80 @@
 #include <readline/readline.h>
 #include <unistd.h>
 
-static int cmd(int argc, char **argv)
+static void other(int aflag, int bflag)
 {
-    printf("argc: %d\n", argc);
-    for (int i = 0; i < argc; i++) {
-        printf("[%d]: '%s'\n", i, argv[i]);
+    int sum;
 
-        //if (strncmp(argv[i], "test", strlen("test")) == 0) {
-        //    clitest(argc, argv);
-        //}
+    printf("%d %d\n", aflag, bflag);
+
+    sum = 0;
+
+    sum += aflag;
+    sum += bflag;
+
+    printf("Other: %d\n", sum);
+}
+
+static void test(int aflag, int bflag)
+{
+    int sum;
+
+    printf("%d %d\n", aflag, bflag);
+
+    sum = 0;
+
+    sum += aflag;
+    sum += bflag;
+
+    printf("Test: %d\n", sum);
+}
+
+static int cli_start(int argc, char **argv, int sub)
+{
+    size_t i;
+
+    int aflag, bflag, c;
+
+    const char *commands[2];
+
+    commands[0] = "test";
+    commands[1] = "other";
+
+    aflag = 0;
+    bflag = 0;
+
+    opterr = 0;
+    optind = sub + 1; //Either start at 1 or 2 to only parse flag options
+
+    while((c = getopt(argc, argv, "ab")) != -1) {
+        switch (c)
+        {
+        case 'a':
+            aflag = 1;
+            break;
+        case 'b':
+            bflag = 1;
+            break;
+        case '?':
+            printf("No option '-%c'.\n", optopt);
+        }
     }
+
+    for (i = 0; i < 2; i++) {
+        if (strncmp(argv[sub], commands[i], strlen(commands[i])) == 0) {
+            switch (i)
+            {
+                case 0:
+                    test(aflag, bflag);
+                    return 0;
+                case 1:
+                    other(aflag, bflag);
+                    return 0;
+            }
+        }
+    }
+
+    printf("Command '%s' not found.\n", argv[0]);
 
     return 0;
 }
@@ -43,74 +107,21 @@ static void cmdloop(char *prompt)
     wordexp_t p;
     errno = 0;
     while (readargv(prompt, &p) == 0) {
-        cmd(p.we_wordc, p.we_wordv);
+        // cmd(p.we_wordc, p.we_wordv);
+        cli_start(p.we_wordc, p.we_wordv, 0);
         wordfree(&p);
         errno = 0;
     }
 }
 
-// static int cli(int argc, char **argv)
-// {
-//     int aflag, bflag, index, c;
-//     char *cvalue, *svalue;
-
-//     aflag = 0;
-//     bflag = 0;
-//     cvalue = NULL;
-//     svalue = NULL;
-
-//     opterr = 0;
-
-//     while((c = getopt(argc, argv, ":abc:s::")) != -1) {
-//         switch (c)
-//         {
-//          case 'a':
-//             aflag = 1;
-//             break;
-//         case 'b':
-//             bflag = 1;
-//             break;
-//         case 'c':
-//             cvalue = optarg;
-//             cmdloop("sk -> cook -> ");
-//             break;
-//         case 's':
-//             svalue = optarg;
-//             cmdloop("sk -> scale -> ");
-//             break;
-//         case '?':
-//             if (optopt == 'c') {
-//                 fprintf (stderr, "Option -%c requires an argument.\n", optopt);
-//                 // printf ("c flag requires an argument");
-//                 // return cli(argc, argv);
-//             } else if (isprint (optopt)) {
-//                 printf ("Options: abcs");
-//                 // return cli(argc, argv);
-//             }
-//         default:
-//             //cli(argc, argv);
-//             abort ();
-//         }
-//     }
-
-//     //printf("aflag = %d, bflag = %d, cvalue = %s\n, svalue= %s\n",
-//           //aflag, bflag, cvalue, svalue);
-
-//     //for (index = optind; index < argc; index++) {
-//     //    printf ("Non-option argument %s\n", argv[index]);
-//     //}
-
-//     //if (strncmp(argv[1], "exit", strlen("exit")) != 0) {
-//     //    return cli(argc, argv);
-//     //}
-
-//     return 0;
-// }
-
-
 int main(int argc, char *argv[])
 {
-    cmdloop("[sk] -> ");
-    // cli(argc, argv);
+    if (argc == 1) {
+        cmdloop("[sk] -> ");
+    } else {
+        cli_start(argc, argv, 1);
+        cmdloop("[sk] -> ");
+    }
+
     return 0;
 }
