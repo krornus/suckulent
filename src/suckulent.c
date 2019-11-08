@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <wordexp.h>
 #include <readline/readline.h>
+#include "history.h"
 #include <unistd.h>
 
 static void other(int aflag, int bflag)
@@ -104,11 +105,14 @@ static int readargv(char *prompt, wordexp_t *p)
 
 static void cmdloop(char *prompt)
 {
+    hist_entry **the_history_list;
+
     wordexp_t p;
     errno = 0;
     while (readargv(prompt, &p) == 0) {
         // cmd(p.we_wordc, p.we_wordv);
         cli_start(p.we_wordc, p.we_wordv, 0);
+        add_history(&p);
         wordfree(&p);
         errno = 0;
     }
