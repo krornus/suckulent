@@ -5,9 +5,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <wordexp.h>
-#include <readline/readline.h>
-#include "history.h"
 #include <unistd.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 static void other(int aflag, int bflag)
 {
@@ -105,17 +105,36 @@ static int readargv(char *prompt, wordexp_t *p)
 
 static void cmdloop(char *prompt)
 {
-    hist_entry **the_history_list;
+    using_history(); /*initialize history*/
+    register HISTORY_STATE *hist;
+    register HIST_ENTRY **hist_list;
+
+    int i;
 
     wordexp_t p;
     errno = 0;
     while (readargv(prompt, &p) == 0) {
         // cmd(p.we_wordc, p.we_wordv);
         cli_start(p.we_wordc, p.we_wordv, 0);
-        add_history(&p);
+        add_history(p.we_wordv[0]);
         wordfree(&p);
         errno = 0;
     }
+
+    hist = history_get_history_state();
+    hist_list = history_list();
+
+    printf ("\nSession History\n\n");
+
+    for (i = 0; i < hist->length; i++) { /* output history list */
+        printf (" %8s  %s\n", hist[i]->line, hist_list[i]->timestamp);
+        free_history_entry (hist_list[i]);     /* free allocated entries */
+    }
+
+    putchar('\n');
+
+    free(hist_list);  /* free HIST_ENTRY list */
+    free(hist);  /* free HISTORY_STATE   */
 }
 
 int main(int argc, char *argv[])
