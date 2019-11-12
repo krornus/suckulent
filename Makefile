@@ -17,16 +17,17 @@ CFLAGS  += -Wall -pedantic
 CFLAGS  += -D_X_OPEN_SOURCE=500 -D_GNU_SOURCE
 CFLAGS  += -I/usr/local/opt/libarchive/include
 # LDFLAGS := -lreadline -L/usr/local/Cellar/libarchive/3.4.0/lib -larchive
-LDFLAGS := -lreadline
+# LDFLAGS := -lreadline
 
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Darwin)
-LDFLAGS += -L/usr/local/Cellar/libarchive/3.4.0/lib -larchive
+LDFLAGS := -L/usr/local/Cellar/libarchive/3.4.0/lib -larchive
+LDFLAGS += -L/usr/local/Cellar/readline/8.0.0_1/lib -lreadline
 endif
 
 ifeq ($(UNAME), Linux)
-LDFLAGS += -larchive
+LDFLAGS := -lreadline -larchive
 endif
 
 .PHONY: all debug release

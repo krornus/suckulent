@@ -127,7 +127,8 @@ static void cmdloop(char *prompt)
     printf ("\nSession History\n\n");
 
     for (i = 0; i < hist->length; i++) { /* output history list */
-        printf(" %8s  %s\n", hist[i]->line, hist_list[i]->timestamp);
+        // printf(" %8s  %s\n", hist_list[i]->line, hist_list[i]->timestamp);
+        printf(" %8s\n", hist_list[i]->line);
         free_history_entry(hist_list[i]);     /* free allocated entries */
     }
 
