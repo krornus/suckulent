@@ -1,3 +1,5 @@
+#include "arfs.h"
+
 #include <err.h>
 #include <errno.h>
 #include <stdio.h>
@@ -43,5 +45,19 @@ static void cmdloop(char *prompt)
 
 int main(int argc, char *argv[])
 {
+    arfs_t *fs;
+    fs = arfs_open("./test.db", AFS_O_WR | AFS_O_CREATE);
+
+    if (!arfs_mkfile(arfs_root(fs), "./a", (uint8_t *)"aaaa", 4))
+        err(1, "failed to make new file");
+
+    if (!arfs_mkfile(arfs_root(fs), "./b", (uint8_t *)"bbbb", 4))
+        err(1, "failed to make new file");
+
+    if (!arfs_mkdir(arfs_root(fs), "./b"))
+        err(1, "failed to make new dir");
+
+    arfs_close(fs);
+
     return 0;
 }
