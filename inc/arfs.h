@@ -28,6 +28,7 @@ void arfs_close(arfs_t *fs);
 
 arfile_t *arfs_root(arfs_t *fs);
 char *arfs_path(arfile_t *file, size_t *len);
+char *xarfs_path(arfile_t *file, size_t *len);
 arfile_t *arfs_dirof(arfile_t *dir, const char *path);
 
 arfile_t *arfs_file(arfile_t *dir, const char *path);

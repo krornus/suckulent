@@ -89,8 +89,8 @@ static struct archive *writear(arfs_t *fs)
         errx(1, "error creating new database archive");
     }
 
-    ARX(fs->aw, archive_write_set_format_pax_restricted(fs->aw));
     ARX(fs->aw, archive_write_add_filter_gzip(fs->aw));
+    ARX(fs->aw, archive_write_set_format_pax_restricted(fs->aw));
     ARX(fs->aw, archive_write_open_filename(fs->aw, fs->path));
 
     return fs->aw;
@@ -149,7 +149,7 @@ static arfile_t *dir_get(arfile_t *dir, const char *name)
         if (strcmp(file->name, name) == 0) {
             return file;
         } else {
-            file = dir->next;
+            file = file->next;
         }
     }
 
@@ -289,6 +289,8 @@ static arfile_t *fstree(arfs_t *fs, struct archive *a)
     return root;
 }
 
+
+
 static char *arfs_path_r(arfile_t *file, size_t *len)
 {
     if (file->fs->root == file) {
@@ -298,16 +300,62 @@ static char *arfs_path_r(arfile_t *file, size_t *len)
         size_t add;
         char *base, *ret;
 
-        base = arfs_path_r(file, len);
-        add = strlen(file->name);
+        base = arfs_path_r(file->parent, len);
+        add = strlen(file->name) + 1;
 
         ret = (char *)xrealloc(base, *len + add + 1);
         strcat(ret, file->name);
+        strcat(ret, "/");
 
         *len += add;
 
         return ret;
     }
+}
+
+static char *pathjoin(arfile_t *dir, const char *add)
+{
+    size_t len;
+    char *bn, *dn;
+
+    dn = arfs_path(dir, &len);
+    bn = abasename(add);
+
+
+    if (strcmp(bn, "..") == 0) {
+        free(bn);
+        bn = NULL;
+        free(dn);
+        dn = NULL;
+        return adirname(dn);
+    } else if (strcmp(bn, ".") == 0) {
+        free(bn);
+        bn = NULL;
+        return dn;
+    } else if (strcmp(bn, "/") == 0) {
+        free(bn);
+        bn = NULL;
+        free(dn);
+        dn = NULL;
+        return xstrdup("/");
+    }
+
+    if (dir_get(dir, bn)) {
+        free(bn);
+        bn = NULL;
+        free(dn);
+        dn = NULL;
+        errno = EEXIST;
+        return NULL;
+    }
+
+    dn = (char *)realloc(dn, len + strlen(bn) + 1);
+    strcat(dn, bn);
+
+    free(bn);
+    bn = NULL;
+
+    return dn;
 }
 
 static arfile_t *mkfile(arfile_t *dir, const char *path, int type, const uint8_t *buf, size_t len)
@@ -321,22 +369,36 @@ static arfile_t *mkfile(arfile_t *dir, const char *path, int type, const uint8_t
         return NULL;
     }
 
-    rpath = arfs_path(dir, NULL);
-    printf("path: %s -> %s\n", path, rpath);
+    rpath = pathjoin(dir, path);
+    if (!rpath) {
+        return NULL;
+    }
+
+    printf("%s\n", rpath);
 
     a = writear(dir->fs);
     ent = archive_entry_new();
-
     archive_entry_set_pathname(ent, rpath);
-    archive_entry_set_filetype(ent, type);
-    ARX(a, archive_write_header(a, ent));
-
-    memset(rpath, 0, strlen(rpath));
-    free(rpath);
-
     if (type == AE_IFREG) {
         archive_entry_set_size(ent, len);
-        ARX(a, archive_write_data(a, buf, len));
+    }
+    archive_entry_set_filetype(ent, type);
+
+    if (type == AE_IFDIR) {
+        archive_entry_set_perm(ent, 0751);
+    } else {
+        archive_entry_set_perm(ent, 0644);
+    }
+
+    ARX(a, archive_write_header(a, ent));
+
+    free(rpath);
+    rpath = NULL;
+
+    if (type == AE_IFREG) {
+        if (archive_write_data(a, buf, len) != len) {
+            erra(a, 1, "failed to write archive data");
+        }
         ARX(a, archive_write_finish_entry(a));
     }
 
@@ -344,6 +406,7 @@ static arfile_t *mkfile(arfile_t *dir, const char *path, int type, const uint8_t
 
     return add_file(dir, path, type);
 }
+
 
 /* fails on invalid args or missing permissions */
 arfs_t *arfs_open(const char *path, int flags)
@@ -470,15 +533,26 @@ arfile_t *arfs_dir(arfile_t *dir, const char *path)
 
 char *arfs_path(arfile_t *file, size_t *len)
 {
+    size_t sub;
+
     if (!file) {
         errno = EINVAL;
         return NULL;
+    } else if (!len) {
+        len = &sub;
+    }
+
+    return arfs_path_r(file, len);
+}
+
+inline char *xarfs_path(arfile_t *file, size_t *len)
+{
+    char *path;
+    path = arfs_path(file, len);
+    if (!path) {
+        errx(1, "invalid file path");
     } else {
-        size_t sub;
-        if (!len) {
-            len = &sub;
-        }
-        return arfs_path_r(file, len);
+        return path;
     }
 }
 
