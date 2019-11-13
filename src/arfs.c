@@ -145,6 +145,14 @@ static arfile_t *dir_get(arfile_t *dir, const char *name)
     arfile_t *file;
     file = dir->entries;
 
+    if (strcmp(name, "..") == 0) {
+        return dir->parent;
+    } else if (strcmp(name, ".") == 0) {
+        return dir;
+    } else if (strcmp(name, "/") == 0) {
+        return dir->fs->root;
+    }
+
     while (file) {
         if (strcmp(file->name, name) == 0) {
             return file;
@@ -171,10 +179,11 @@ static arfile_t *arfs_get(arfile_t *dir, const char *path)
         int errsv;
 
         bn = abasename(path);
-
         dir = arfs_dirof(dir, path);
         if (dir) {
             ret = dir_get(dir, bn);
+        } else {
+            ret = NULL;
         }
         errsv = errno;
 
@@ -240,7 +249,7 @@ static arfile_t *newtree(arfs_t *fs)
     root->name = "/";
     root->fs = fs;
     root->next = NULL;
-    root->parent = NULL;
+    root->parent = root;
     root->entries = NULL;
 
     return root;
@@ -321,26 +330,8 @@ static char *pathjoin(arfile_t *dir, const char *add)
     dn = arfs_path(dir, &len);
     bn = abasename(add);
 
-
-    if (strcmp(bn, "..") == 0) {
-        free(bn);
-        bn = NULL;
-        free(dn);
-        dn = NULL;
-        return adirname(dn);
-    } else if (strcmp(bn, ".") == 0) {
-        free(bn);
-        bn = NULL;
-        return dn;
-    } else if (strcmp(bn, "/") == 0) {
-        free(bn);
-        bn = NULL;
-        free(dn);
-        dn = NULL;
-        return xstrdup("/");
-    }
-
-    if (dir_get(dir, bn)) {
+    if (dir_get(dir, bn))
+    {
         free(bn);
         bn = NULL;
         free(dn);
