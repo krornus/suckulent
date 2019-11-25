@@ -129,13 +129,21 @@ static void cmdloop(char *prompt)
     for (i = 0; i < hist->length; i++) { /* output history list */
         // printf(" %8s  %s\n", hist_list[i]->line, hist_list[i]->timestamp);
         printf(" %8s\n", hist_list[i]->line);
-        free_history_entry(hist_list[i]);     /* free allocated entries */
+
+        if (hist_list[i] != NULL) {
+            free_history_entry(hist_list[i]);     /* free allocated entries */
+        }
     }
 
     putchar('\n');
 
+    // if (hist_list != NULL) {
     free(hist_list);  /* free HIST_ENTRY list */
+    // }
+
+    // if (hist != NULL) {
     free(hist);  /* free HISTORY_STATE   */
+    // }
 }
 
 int main(int argc, char *argv[])
