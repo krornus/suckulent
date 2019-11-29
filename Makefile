@@ -22,8 +22,9 @@ CFLAGS  += -I/usr/local/opt/libarchive/include
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Darwin)
+CFLAGS  += -I/usr/local/Cellar/8.0.1/include/readline
 LDFLAGS := -L/usr/local/Cellar/libarchive/3.4.0/lib -larchive
-LDFLAGS += -L/usr/local/Cellar/readline/8.0.0_1/lib -lreadline
+LDFLAGS += -L/usr/local/Cellar/readline/8.0.1/lib -lreadline -lhistory
 endif
 
 ifeq ($(UNAME), Linux)
